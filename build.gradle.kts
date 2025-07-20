@@ -3,6 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0" // Use the Kotlin version you are using
 }
 
 group = "com.yogesh"
@@ -18,8 +19,8 @@ repositories {
 }
 
 kotlin {
+    jvmToolchain(17)
     jvm {
-        jvmToolchain(17)
         withJava()
     }
 
@@ -27,13 +28,18 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation(":libs/sherpa-onnx-v1.10.46-java17")
-                // https://mvnrepository.com/artifact/androidx.compose.material/material-icons-extended
-                runtimeOnly("androidx.compose.material:material-icons-extended:1.7.8")
+                implementation(files("libs/sherpa-onnx-v1.10.46-java17.jar"))
+                implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.5.0")
+                implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.8.2")
+//                implementation("androidx.compose.material3:material3:1.2.1")
+                implementation(compose.material3)
+                implementation(compose.preview)
 
             }
         }
+
         val jvmTest by getting
+
     }
 }
 
@@ -67,7 +73,7 @@ compose.desktop {
             }
 
             // Specify resources to include
-            modules("libs/sherpa-onnx-jni.dll")
+//            modules("libs/sherpa-onnx-jni.dll")
 
             // Copy native libraries to the distribution
 //            distributionPath.set(project.buildDir.resolve("dist"))

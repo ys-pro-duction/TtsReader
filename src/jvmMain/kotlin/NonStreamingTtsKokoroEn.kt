@@ -4,6 +4,7 @@ import com.k2fsa.sherpa.onnx.OfflineTtsKokoroModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.nio.ByteBuffer
@@ -17,7 +18,9 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.DataLine
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.SourceDataLine
-import kotlin.random.Random
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 object NonStreamingTtsKokoroEn {
 //    fun main(sentance: String) {
@@ -133,25 +136,23 @@ object NonStreamingTtsKokoroEn {
 
         val generationText = sanitizeString(text)
         val audio = if (generationText.isNotEmpty()) tts.generate(
-            generationText,
-            TTS.SID,
+            generationText, TTS.SID,
 //            Random.nextInt(0,10),
             TTS.SPEED
         ) else null
         val audioDuration = audio?.let { audio.samples.size / audio.sampleRate.toFloat() } ?: 0f
-        TTS.audioLoaded[index] =
-            AudioData(
-                text,
-                audio?.let { floatArrayToByteArray(audio.samples) } ?: ByteArray(0),
-                audio?.sampleRate ?: 0,
-                audioDuration,
-                TTS.SID,
-                TTS.SPEED
-            )
+        TTS.audioLoaded[index] = AudioData(
+            text,
+            audio?.let { floatArrayToByteArray(audio.samples) } ?: ByteArray(0),
+            audio?.sampleRate ?: 0,
+            audioDuration,
+            TTS.SID,
+            TTS.SPEED)
         println("$index == $audioDuration == $text")
 //            TTS.isProcessing = false
     }
 
+    var audioVisualViewModel: AudioVisualViewModel? = null
     fun playAudio(index: Int = TTS.currentWordIdx, text: String = ""): Boolean {
         Logger.getGlobal().log(Level.INFO, "playAudio start $text")
         TTS.audioLoaded[index]?.let { audioData ->
@@ -170,7 +171,31 @@ object NonStreamingTtsKokoroEn {
 ////                Thread.sleep((audioData.audioDuration * 1000).toLong())
 ////                delay((audioData.audioDuration *1000).toLong())
 //                i += chunkSize
-            line.write(audioData.audioFloatData, 0, audioData.audioFloatData.size)
+            println()
+            val numBars = 5
+            for (i in 0 until audioData.byteArray.size step 1024 * 20) {
+                val byteArray =
+                    audioData.byteArray.copyOfRange(i, min(i + 1024 * 20, audioData.byteArray.size))
+                val segmentSize = byteArray.size / numBars
+                val barData = FloatArray(numBars)
+                for (i in 0 until numBars) {
+                    val start = i * segmentSize
+                    val end = if (i == numBars - 1) byteArray.size else (i + 1) * segmentSize
+                    val subArray = byteArray.copyOfRange(start, end)
+                    barData[i] = max(subArray.map { abs(it.toInt()) }.average()-20,0.0).toFloat()
+                }
+
+                println(barData.joinToString(", ") { String.format("%.2f", it) })
+
+                line.write(byteArray, 0, byteArray.size)
+                CoroutineScope(Dispatchers.IO).launch {
+                    delay(0)
+                    audioVisualViewModel?.barData?.value = barData
+                }
+            }
+
+
+//            line.write(audioData.audioFloatData, 0, audioData.audioFloatData.size)
         }
 //            line.drain()
 //            line.close()
@@ -183,11 +208,7 @@ object NonStreamingTtsKokoroEn {
 
     private fun sanitizeString(input: String): String {
         val string = input.filter { char ->
-            char.isLetterOrDigit() ||
-                    char.isWhitespace() ||
-                    char == '.' ||
-                    char == '\'' ||
-                    char == ','
+            char.isLetterOrDigit() || char.isWhitespace() || char == '.' || char == '\'' || char == ','
         }.replace("\n", " ")
         return if (string == " ") ""
         else string
@@ -226,20 +247,12 @@ object NonStreamingTtsKokoroEn {
             val tokens = "${dir}tokens.txt"
             val dataDir = "${dir}espeak-ng-data"
             val kokoroModelConfig =
-                OfflineTtsKokoroModelConfig.builder()
-                    .setModel(model)
-                    .setVoices(voices)
-                    .setTokens(tokens)
-                    .setDataDir(dataDir)
-                    .build()
+                OfflineTtsKokoroModelConfig.builder().setModel(model).setVoices(voices)
+                    .setTokens(tokens).setDataDir(dataDir).build()
 
             val modelConfig =
-                OfflineTtsModelConfig.builder()
-                    .setKokoro(kokoroModelConfig)
-                    .setNumThreads(4)
-                    .setProvider("cuda")
-                    .setDebug(true)
-                    .build()
+                OfflineTtsModelConfig.builder().setKokoro(kokoroModelConfig).setNumThreads(4)
+                    .setProvider("cuda").setDebug(true).build()
 
             val config = OfflineTtsConfig.builder().setModel(modelConfig).build()
             val libPath = File("libs/sherpa-onnx-jni.dll").absolutePath
@@ -282,6 +295,7 @@ object NonStreamingTtsKokoroEn {
         fun isLoaded(index: Int, s: String): Boolean {
             return (audioLoaded[index] != null && audioLoaded[index]?.speakerId == SID && audioLoaded[index]?.voiceSpeed == SPEED && audioLoaded[index]?.text == s)
         }
+
         fun stopAudio() {
             isPlaying = false
             line?.stop()
