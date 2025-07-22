@@ -11,9 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.util.fastForEachIndexed
 import kotlinx.coroutines.launch
@@ -40,14 +42,14 @@ fun BoxScope.AudioVisualize(
                     animatables[index].animateTo(
                         targetValue = value, animationSpec = tween(
                             delayMillis = 0,
-                            durationMillis = abs(((oldData.value[index] - value) / 40) * 100).toInt()
+                            durationMillis = abs(((oldData.value[index] - value) / 40) * 300).toInt()
                         )
                     )
                 }
                 animatables[index].animateTo(
                     targetValue = 0f, animationSpec = tween(
-                        delayMillis = 100,
-                        durationMillis = abs((value / 40) * 200).toInt(),
+                        delayMillis = abs((value / 40) * 200).toInt(),
+                        durationMillis = abs((value / 40) * 500).toInt(),
                         easing = LinearEasing
                     )
                 )

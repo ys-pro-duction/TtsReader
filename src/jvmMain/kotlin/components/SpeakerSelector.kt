@@ -2,6 +2,8 @@ package components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +14,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -29,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -39,6 +43,9 @@ import androidx.compose.ui.unit.dp
 fun SpeakerSelecter(backgroundColor: Color = Color(0xff151515), modifier: Modifier) {
     val speakerInteraction = remember { MutableInteractionSource() }
     val showAllSpeaker = remember { mutableStateOf(false) }
+    val animateOffest = animateOffsetAsState(
+        targetValue = if (!showAllSpeaker.value) Offset(0f,0f) else Offset(-108f,-120f)
+    )
     showAllSpeaker.value = speakerInteraction.collectIsHoveredAsState().value
     val speakers = remember {
         mutableStateListOf(
@@ -58,7 +65,7 @@ fun SpeakerSelecter(backgroundColor: Color = Color(0xff151515), modifier: Modifi
     val animateGridWith = animateDpAsState(if (showAllSpeaker.value) 360.dp else 120.dp)
     LazyVerticalGrid(
         GridCells.Fixed(if (showAllSpeaker.value) 3 else 1),
-        modifier = modifier.requiredSize(
+        modifier = modifier.offset(animateOffest.value.x.dp, animateOffest.value.y.dp).requiredSize(
             width = animateGridWith.value * 0.9f,
             height = animateGridWith.value
         ).background(backgroundColor, RoundedCornerShape(12.dp)).hoverable(speakerInteraction)

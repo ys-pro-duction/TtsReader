@@ -23,92 +23,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 object NonStreamingTtsKokoroEn {
-//    fun main(sentance: String) {
-//        println("Main")
-//        // please visit
-//        // https://k2-fsa.github.io/sherpa/onnx/tts/pretrained_models/kokoro.html
-//        // to download model files
-//        val text = sentance.trimIndent()
-//        val tts = TTS.getInstance()
-//
-//
-//        val start = System.currentTimeMillis()
-//        val count = intArrayOf(1)
-//        Arrays.stream(text.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
-//            .toList().forEach(
-//                Consumer { s: String ->
-//                    val audio = tts.generate(s, TTS.SID, TTS.SPEED)
-//                    val stop = System.currentTimeMillis()
-//
-//                    val timeElapsedSeconds = (stop - start) / 1000.0f
-//
-//                    val audioDuration = audio.samples.size / audio.sampleRate.toFloat()
-//                    val real_time_factor = timeElapsedSeconds / audioDuration
-//
-//                    val waveFilename = count[0]++.toString() + ". " + s + ".wav"
-//                    try {
-//                        playAudio(
-//                            floatArrayToByteArray(audio.samples),
-//                            audio.sampleRate,
-//                            object : WordProgressListener {
-//                                override fun onWordSpoken(wordIndex: Int) {
-//                                }
-//                            },
-//                            text.split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-//                                .toTypedArray(),
-//                            audioDuration
-//                        )
-//                    } catch (e: Exception) {
-//                        throw RuntimeException(e)
-//                    }
-//                    audio.save(waveFilename)
-//                    val samples = audio.samples
-//                    System.out.printf("-- elapsed : %.3f seconds\n", timeElapsedSeconds)
-//                    System.out.printf("-- audio duration: %.3f seconds\n", audioDuration)
-//                    System.out.printf("-- real-time factor (RTF): %.3f\n", real_time_factor)
-//                    System.out.printf("-- text: %s\n", s)
-//                    System.out.printf("-- Saved to %s\n", waveFilename)
-//                })
-//
-//        println("=====================================")
-////        tts.release()
-//    }
-    //    @Throws(Exception::class)
-//    private fun playAudio(
-//        samples: ByteArray,
-//        sampleRate: Int,
-//        listener: WordProgressListener,
-//        words: Array<String>,
-//        wordDuration: Float
-//    ) {
-//        val format = AudioFormat(sampleRate.toFloat(), 16, 1, true, false)
-//        val info = DataLine.Info(SourceDataLine::class.java, format)
-//        val line = AudioSystem.getLine(info) as SourceDataLine
-//        line.open(format)
-//        line.start()
-//
-//        var wordIndex = 0
-//        val chunkSize = (sampleRate * wordDuration * 2).toInt() // Each sample is 2 bytes
-//        var i = 0
-//        while (i < samples.size) {
-//            if (wordIndex < words.size) {
-//                listener.onWordSpoken(wordIndex)
-//                wordIndex++
-//                println("=== $wordIndex ====")
-//            }
-//
-//            line.write(
-//                samples, i,
-//                min(chunkSize.toDouble(), (samples.size - i).toDouble()).toInt()
-//            )
-//            Thread.sleep((wordDuration * 1000).toLong())
-//            i += chunkSize
-//        }
-//
-////        line.drain()
-////        line.close()
-//    }
-
 
     fun generateAudio() {
         if (TTS.isProcessing) return
@@ -152,8 +66,8 @@ object NonStreamingTtsKokoroEn {
 //            TTS.isProcessing = false
     }
 
-    var audioVisualViewModel: AudioVisualViewModel? = null
-    fun playAudio(index: Int = TTS.currentWordIdx, text: String = ""): Boolean {
+    var baseViewModel: BaseViewModel? = null
+    suspend fun playAudio(index: Int = TTS.currentWordIdx, text: String = ""): Boolean {
         Logger.getGlobal().log(Level.INFO, "playAudio start $text")
         TTS.audioLoaded[index]?.let { audioData ->
             val line = TTS.getAudioSourceLine(audioData)
@@ -173,9 +87,10 @@ object NonStreamingTtsKokoroEn {
 //                i += chunkSize
             println()
             val numBars = 5
-            for (i in 0 until audioData.byteArray.size step 1024 * 20) {
+            val chunkSize = 1024*10
+            for (i in 0 until audioData.byteArray.size step chunkSize) {
                 val byteArray =
-                    audioData.byteArray.copyOfRange(i, min(i + 1024 * 20, audioData.byteArray.size))
+                    audioData.byteArray.copyOfRange(i, min(i + chunkSize, audioData.byteArray.size))
                 val segmentSize = byteArray.size / numBars
                 val barData = FloatArray(numBars)
                 for (i in 0 until numBars) {
@@ -188,10 +103,7 @@ object NonStreamingTtsKokoroEn {
                 println(barData.joinToString(", ") { String.format("%.2f", it) })
 
                 line.write(byteArray, 0, byteArray.size)
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(0)
-                    audioVisualViewModel?.barData?.value = barData
-                }
+                baseViewModel?.updateAudioVisualBar(barData)
             }
 
 
@@ -236,7 +148,7 @@ object NonStreamingTtsKokoroEn {
         val audioLoadingQueue: Queue<Pair<Int, String>> = LinkedList()
         var line: SourceDataLine? = null
         var SID = 0
-        var SPEED = 1.0f
+        var SPEED = 0.5f
         var speakerVolume = 1.0f
         private var tts: OfflineTts? = null
         fun getInstance(): OfflineTts {

@@ -31,7 +31,6 @@ kotlin {
                 implementation(files("libs/sherpa-onnx-v1.10.46-java17.jar"))
                 implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.5.0")
                 implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.8.2")
-//                implementation("androidx.compose.material3:material3:1.2.1")
                 implementation(compose.material3)
                 implementation(compose.preview)
 

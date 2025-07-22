@@ -262,7 +262,6 @@ fun Modifier.mouseScrollable(onScroll: (Float) -> Unit): Modifier = composed {
 suspend fun loadAndPlay(
     words: List<TextSegment>,
     fromIndex: Int,
-    wordAnimations: List<Animatable<Float, AnimationVector1D>>,
     updateIndex: (Int) -> Unit
 ) {
     if (fromIndex < 0 || fromIndex >= words.size || !NonStreamingTtsKokoroEn.TTS.isPlaying) return
@@ -275,15 +274,15 @@ suspend fun loadAndPlay(
             ) {
                 delay(100)
             }
-            loadAndPlay(words, fromIndex, wordAnimations, updateIndex)
+            loadAndPlay(words, fromIndex, updateIndex)
         } else {
             NonStreamingTtsKokoroEn.TTS.audioLoadingQueue.add(Pair(fromIndex, words[fromIndex].text))
             NonStreamingTtsKokoroEn.generateAudio()
-            loadAndPlay(words, fromIndex, wordAnimations, updateIndex)
+            loadAndPlay(words, fromIndex, updateIndex)
         }
     } else {
-        val notLoadedidx = playWordsWithAnimation(words, fromIndex, wordAnimations, updateIndex)
-        loadAndPlay(words, notLoadedidx, wordAnimations, updateIndex)
+        val notLoadedidx = playWordsWithAnimation(words, fromIndex,  updateIndex)
+        loadAndPlay(words, notLoadedidx,  updateIndex)
     }
 }
 
@@ -291,7 +290,6 @@ suspend fun loadAndPlay(
 suspend fun playWordsWithAnimation(
     words: List<TextSegment>,
     fromIndex: Int,
-    animations: List<Animatable<Float, AnimationVector1D>>,
     updateIndex: (Int) -> Unit
 ): Int {
 //    if (NonStreamingTtsKokoroEn.TTS.isPlaying) return fromIndex
@@ -315,16 +313,7 @@ suspend fun playWordsWithAnimation(
         updateIndex(index) // Highlight current word
 
 
-        animations.getOrNull(index)?.snapTo(0f) // Reset animation
-        animations.getOrNull(index-1)
-            ?.animateTo(
-                0f,
-                animationSpec = tween(durationMillis = 100)
-            ) // Fade out
-        animations.getOrNull(index)?.animateTo(
-            1f,
-            animationSpec = tween(durationMillis = 100)
-        )
+
 
         CoroutineScope(Dispatchers.IO).launch {
             if (!NonStreamingTtsKokoroEn.TTS.isPlaying) return@launch
@@ -332,7 +321,6 @@ suspend fun playWordsWithAnimation(
             NonStreamingTtsKokoroEn.playAudio(index, audioData.text)
             if (index == words.size-1) {
                 NonStreamingTtsKokoroEn.TTS.finished = true
-                animations.getOrNull(index)?.snapTo(0f)
                 NonStreamingTtsKokoroEn.TTS.currentWordIdx = 0
             }
         }.join()

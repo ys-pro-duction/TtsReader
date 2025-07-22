@@ -37,7 +37,7 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
         val end = match.range.first
         val segmentText = modified.substring(lastIndex, end)
         val delimiter = match.value
-        println()
+        println(end)
 
         result.add(TextSegment(segmentText, delimiter))
 //        if (segmentText.isNotEmpty()) {

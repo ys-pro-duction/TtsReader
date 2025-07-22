@@ -1,15 +1,24 @@
+@file:OptIn(ExperimentalAnimationApi::class)
+
 package components
 
+import BaseViewModel
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -18,23 +27,23 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import components.Modifier
-import kotlinx.coroutines.delay
+import tts.TTSState
 
 
 @Preview
 @Composable
 fun RowScope.PlaybackController(
     modifier: Modifier = Modifier,
-    isPlaying: Boolean,
+    baseViewModel: BaseViewModel,
     onGeneratePlayClick: () -> Unit,
     onResetClick: () -> Unit,
     onPreviousClick: () -> Unit,
@@ -44,91 +53,70 @@ fun RowScope.PlaybackController(
     Column(
         modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.SpaceEvenly
     ) {
-//        val m = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
-//        Button(
-//            onClick = onPreviousClick,
-//            enabled = enabled,
-//            modifier = m,
-//            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray)
-//        ) {
-//            Text("Generate & Play", color = Color.White)
-//        }
-//
-//        Row() {
-//            Button(
-//                onClick = onPreviousClick,
-//                enabled = enabled,
-//                modifier = m.weight(1f),
-//                colors = ButtonDefaults.buttonColors(backgroundColor = Color.DarkGray)
-//            ) {
-//                Text("Previous", color = Color.White)
-//            }
-//            Button(
-//                onClick = onNextClick,
-//                enabled = enabled,
-//                modifier = m.weight(1f),
-//                colors = ButtonDefaults.buttonColors(backgroundColor = Color.DarkGray)
-//            ) {
-//                Text("Next", color = Color.White)
-//            }
-//        }
-//        Button(
-//            onClick = onResetClick,
-//            enabled = enabled,
-//            modifier = m,
-//            colors = ButtonDefaults.buttonColors(backgroundColor = Color.DarkGray)
-//        ) {
-//            Text("Restart", color = Color.White)
-//        }
-
-        val play = remember { mutableStateOf(false) }
-        val btnModifier = Modifier.fillMaxSize().weight(1f).padding(4.dp)
-            .background(Color.DarkGray, shape = RoundedCornerShape(16.dp)).padding(20.dp)
-//        IconButton({},modifier = Modifier.fillMaxWidth().weight(1f).background(Color.DarkGray, shape = RoundedCornerShape(16.dp))){
-        Box(btnModifier, contentAlignment = Alignment.Center) {
-            if (!play.value) Icon(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Play",
-                modifier = Modifier.fillMaxSize(),
-                tint = Color.White
-            ) else Icon(
-                imageVector = Icons.Default.Pause,
-                contentDescription = "Pause",
-                modifier = Modifier.fillMaxSize(),
-                tint = Color.White
-            )
+        val btnModifier = remember {
+            Modifier.fillMaxSize().weight(1f).padding(4.dp)
+                .background(Color.DarkGray, shape = RoundedCornerShape(16.dp)).padding(20.dp)
         }
-//        }
+        PlayPauseButton(btnModifier = btnModifier, baseViewModel, { onGeneratePlayClick() })
         Row(modifier = Modifier.fillMaxSize().weight(1f)) {
-//            IconButton({},modifier = Modifier.fillMaxSize().weight(1f).background(Color.DarkGray, shape = RoundedCornerShape(16.dp))){
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Arrow back",
-                modifier = Modifier.then(btnModifier),
+                modifier = Modifier.clickable{onPreviousClick()}.then(btnModifier),
                 tint = Color.White
             )
-//            }
-//            IconButton({},modifier = Modifier.fillMaxSize().weight(1f).background(Color.DarkGray, shape = RoundedCornerShape(16.dp))){
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = "Arrow forward",
-                modifier = Modifier.then(btnModifier),
+                modifier = Modifier.clickable{onNextClick()}.then(btnModifier),
                 tint = Color.White
             )
-//            }
-//            IconButton({},modifier = Modifier.fillMaxSize().weight(1f).background(Color.DarkGray, shape = RoundedCornerShape(16.dp))){
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = "restart",
-                modifier = Modifier.then(btnModifier),
+                modifier = Modifier.clickable{onResetClick()}.then(btnModifier),
                 tint = Color.White
             )
-//            }
         }
-        LaunchedEffect(Unit) {
-            while (true) {
-                delay(1000)
-                play.value = !play.value
+    }
+}
+
+@Composable
+private fun ColumnScope.PlayPauseButton(btnModifier: Modifier, baseViewModel: BaseViewModel, onGeneratePlayClick: () -> Unit) {
+    val ttsState by baseViewModel.ttsState.collectAsState(TTSState.STOP)
+    val animateBackgroundColor = animateColorAsState(if (ttsState == TTSState.PLAY) Color.DarkGray else Color.White,
+        tween()
+    )
+    Box(Modifier.clickable {
+        onGeneratePlayClick()
+        if (ttsState == TTSState.PLAY) {
+            baseViewModel.stopTTS()
+        } else if (ttsState == TTSState.STOP) {
+            baseViewModel.startTTS()
+        }
+    }.then(Modifier.fillMaxSize().weight(1f).padding(4.dp)
+        .background(animateBackgroundColor.value, shape = RoundedCornerShape(16.dp)).padding(20.dp)), contentAlignment = Alignment.Center) {
+        when (ttsState) {
+            TTSState.PLAY -> Icon(
+                imageVector = Icons.Default.Pause,
+                contentDescription = "Play",
+                modifier = Modifier.fillMaxSize(),
+                tint = Color.White
+            )
+
+            TTSState.STOP -> Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Pause",
+                modifier = Modifier.fillMaxSize(),
+                tint = Color.DarkGray
+            )
+
+            TTSState.LOADING -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp,
+                )
             }
         }
     }

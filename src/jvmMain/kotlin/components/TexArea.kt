@@ -1,16 +1,14 @@
 package components
 
+import BaseViewModel
 import NonStreamingTtsKokoroEn
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +19,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,11 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -46,21 +44,22 @@ import utils.TextSegment
 import utils.splitSmartWithDelimiters
 
 @Composable
-fun BoxScope.MainTextArea(modifier: Modifier) {
-    var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
+fun BoxScope.MainTextArea(modifier: Modifier, baseViewModel: BaseViewModel) {
+    var textFieldValue by remember { mutableStateOf("") }
     var sentences by remember { mutableStateOf(listOf<TextSegment>()) }
-    var currentWordIndex by remember { mutableStateOf(-1) }
 
     val scrollState = rememberScrollState()
 
     val coroutineScope = rememberCoroutineScope()
 
-    val wordAnimations = remember(sentences.size) {
-        sentences.map { Animatable(0f) }
-    }
+    val currentHighlightWordIndex = baseViewModel.currentHighlightWordIdx.collectAsState(-1)
+
     val focusRequester = remember { FocusRequester() }
 
-
+    LaunchedEffect(textFieldValue) {
+        println(textFieldValue)
+        sentences = splitSmartWithDelimiters(textFieldValue)
+    }
     Box(
         modifier = Modifier.fillMaxSize().padding(bottom = 150.dp)
         .background(Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(8.dp)).padding(8.dp)
@@ -77,13 +76,12 @@ fun BoxScope.MainTextArea(modifier: Modifier) {
                 modifier = Modifier.fillMaxSize().focusRequester(focusRequester),
                 onValueChange = { newValue -> textFieldValue = newValue },
                 textStyle = TextStyle(
-                    fontSize = 18.sp,
-                    color = Color.Green,  // Make the actual input transparent
+                    fontSize = 18.sp, color = Color.Green,  // Make the actual input transparent
                     letterSpacing = TextUnit(1f, TextUnitType.Sp)
                 ),
                 decorationBox = { innerTextField ->
                     Box {
-                        if (textFieldValue.text.isEmpty()) {
+                        if (textFieldValue.isEmpty()) {
                             Text(
                                 text = "Enter your text here...",
                                 color = Color.White.copy(.5f),
@@ -91,17 +89,13 @@ fun BoxScope.MainTextArea(modifier: Modifier) {
                                 modifier = Modifier.padding(start = 4.dp)
                             )
                         }
-                        sentences = splitSmartWithDelimiters(textFieldValue.text)
                         val animatedText = buildAnnotatedString {
                             sentences.forEachIndexed { index, sentence ->
-                                val animatedColor = lerp(
-                                    Color.Transparent,
-                                    Color.Yellow.copy(alpha = 0.2f),
-                                    wordAnimations.getOrNull(index)?.value ?: 0f
-                                )
                                 withStyle(
                                     SpanStyle(
-                                        background = animatedColor,
+                                        background = if (currentHighlightWordIndex.value == index) Color.Yellow.copy(
+                                            alpha = 0.2f
+                                        ) else Color.Transparent,
                                         color = Color.White.copy(.8f),
                                         letterSpacing = TextUnit(1f, TextUnitType.Sp)
                                     )
@@ -132,14 +126,12 @@ fun BoxScope.MainTextArea(modifier: Modifier) {
                 }
                 NonStreamingTtsKokoroEn.TTS.finished = false
                 NonStreamingTtsKokoroEn.TTS.isPlaying = true
-                currentWordIndex = -1
                 coroutineScope.launch {
                     NonStreamingTtsKokoroEn.TTS.audioLoadingQueue.add(Pair(0, sentences[0].text))
                     NonStreamingTtsKokoroEn.generateAudio()
                     loadAndPlay(
-                        sentences, NonStreamingTtsKokoroEn.TTS.currentWordIdx, wordAnimations
+                        sentences, NonStreamingTtsKokoroEn.TTS.currentWordIdx
                     ) { newIndex ->
-                        currentWordIndex = newIndex
                     }
                 }
             },
