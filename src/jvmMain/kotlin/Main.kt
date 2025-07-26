@@ -15,39 +15,54 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import components.AudioVisualize
 import components.Controller
+import components.DownloadModelDialog
 import components.MainTextArea
 import components.Modifier
-import kotlinx.coroutines.delay
+import tts.Server
+import tts.TTSModel
 import tts.TTSState
 import java.awt.Dimension
+import java.io.File
+import java.io.InputStream
+import java.net.URL
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
 @Composable
 fun App(baseViewModel: BaseViewModel) {
     MaterialTheme {
         Box(Modifier.background(Color(0xff151515)).padding(8.dp).fillMaxSize()) {
 //                AnimatedWordHighlightTTS(modifier = Modifier.align(Alignment.TopCenter))
-            MainTextArea(modifier = Modifier,baseViewModel = baseViewModel)
-            Controller(modifier = Modifier.align(Alignment.BottomCenter), baseViewModel = baseViewModel)
+            MainTextArea(modifier = Modifier, baseViewModel = baseViewModel)
+            Controller(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                baseViewModel = baseViewModel
+            )
 //                PositionedBlueBoxExample()
 
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
     Window(
         title = "Text to speech", undecorated = true, transparent = false, onCloseRequest = {
-            NonStreamingTtsKokoroEn.TTS.freeResources()
+            TTSModel.freeResources()
             exitApplication()
         }) {
         window.minimumSize = Dimension(600, 400)
@@ -58,6 +73,7 @@ fun main() = application {
         ) {
             Column(modifier = Modifier.background(Color.Black).fillMaxSize()) {
                 val baseViewModel = remember { BaseViewModel() }
+                val showDownloadModelDialog = remember { mutableStateOf(false) }
                 WindowDraggableArea {
                     Box(
 //                        modifier = Modifier.fillMaxWidth().height(48.dp),
@@ -70,16 +86,11 @@ fun main() = application {
 //                            fontWeight = FontWeight.ExtraBold,
 //                            fontSize = MaterialTheme.typography.h6.fontSize
 //                        )
-                        val baseViewModel = remember { BaseViewModel() }
-                        NonStreamingTtsKokoroEn.baseViewModel = baseViewModel
                         val barData = baseViewModel.barData.collectAsState()
                         AudioVisualize(
                             modifier = Modifier
                                 .offset(5.dp)
-                                .width(90.dp)
-                                .background(Color.Green)
-                                ,
-                            barData = barData.value.toList()
+                                .width(90.dp), barData = barData.value.toList()
                         )
                     }
                 }
@@ -88,23 +99,18 @@ fun main() = application {
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     App(baseViewModel = baseViewModel)
+                    if (showDownloadModelDialog.value) DownloadModelDialog(TTSModel.url,{showDownloadModelDialog.value = false})
+                }
+                LaunchedEffect(Unit) {
+                    if (TTSModel.isModelExist()){
+                        baseViewModel.setTTSState(TTSState.STOP)
+                    }else{
+                        showDownloadModelDialog.value = true
+                    }
+                    Server(baseViewModel).startSimpleTtsServer()
                 }
             }
         }
-    }
 
-//    val input = """
-//        it's me. this is another sentence.
-//        this is another title:
-//        and this is line
-//        """.trimIndent()
-//
-//
-//    val segments = splitSmartWithDelimiters(input)
-//    println("Segments:")
-//    segments.forEach { println("• '${it.text}' [${it.delimiter.replace("\n", "\\n")}]") }
-//
-//    val reconstructed = reconstructFromSegments(segments)
-//    println("\nReconstructed:")
-//    println(reconstructed)
+    }
 }

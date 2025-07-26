@@ -26,12 +26,17 @@ import androidx.compose.ui.Modifier as Modi
 val Modifier
     get() = Modi
         .border(
-            Random.nextInt(1..2).dp,
-        Color(Random.nextInt(100..255), Random.nextInt(100..255), Random.nextInt(100..255),Random.nextInt(100..200))
-    )
+            Random.nextInt(1..3).dp,
+            Color(
+                Random.nextInt(100..255),
+                Random.nextInt(100..255),
+                Random.nextInt(100..255),
+                Random.nextInt(20..200)
+            )
+        )
 
 @Composable
-fun BoxScope.Controller(modifier: Modi,baseViewModel: BaseViewModel) {
+fun BoxScope.Controller(modifier: Modi, baseViewModel: BaseViewModel) {
     val speakerOffset = remember { mutableStateOf(Offset.Zero) }
     Row(
         modifier = modifier.height(150.dp).padding(top = 8.dp),
@@ -49,10 +54,12 @@ fun BoxScope.Controller(modifier: Modi,baseViewModel: BaseViewModel) {
         Row(modifier = Modifier.onGloballyPositioned({
             speakerOffset.value = it.boundsInWindow().topLeft
         }), horizontalArrangement = Arrangement.End) {
-            VolumeSpeedControlls()
-//            Spacer(modifier = Modifier.size(108.dp, 120.dp))
-            Box(modifier = Modifier.requiredSize(108.dp, 120.dp), contentAlignment = Alignment.BottomEnd) {
-                SpeakerSelecter(modifier = Modifier)
+            VolumeSpeedControlls(baseViewModel = baseViewModel)
+            Box(
+                modifier = Modifier.requiredSize(108.dp, 120.dp),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                SpeakerSelecter(modifier = Modifier, baseViewModel = baseViewModel)
             }
         }
     }

@@ -32,17 +32,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier as Modi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tts.TTSState
 
 
 @Preview
 @Composable
 fun RowScope.PlaybackController(
-    modifier: Modifier = Modifier,
+    modifier: Modi = Modifier,
     baseViewModel: BaseViewModel,
     onGeneratePlayClick: () -> Unit,
     onResetClick: () -> Unit,
@@ -62,19 +66,21 @@ fun RowScope.PlaybackController(
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Arrow back",
-                modifier = Modifier.clickable{onPreviousClick()}.then(btnModifier),
+                modifier = Modifier.clickable{baseViewModel.previousSpeech()}.then(btnModifier),
                 tint = Color.White
             )
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = "Arrow forward",
-                modifier = Modifier.clickable{onNextClick()}.then(btnModifier),
+                modifier = Modifier.clickable{ CoroutineScope(Dispatchers.Default).launch { baseViewModel.nextSpeech() } }.then(btnModifier),
                 tint = Color.White
+
             )
+
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = "restart",
-                modifier = Modifier.clickable{onResetClick()}.then(btnModifier),
+                modifier = Modifier.clickable{baseViewModel.restartWholeSpeech()}.then(btnModifier),
                 tint = Color.White
             )
         }
@@ -82,7 +88,7 @@ fun RowScope.PlaybackController(
 }
 
 @Composable
-private fun ColumnScope.PlayPauseButton(btnModifier: Modifier, baseViewModel: BaseViewModel, onGeneratePlayClick: () -> Unit) {
+private fun ColumnScope.PlayPauseButton(btnModifier: Modi, baseViewModel: BaseViewModel, onGeneratePlayClick: () -> Unit) {
     val ttsState by baseViewModel.ttsState.collectAsState(TTSState.STOP)
     val animateBackgroundColor = animateColorAsState(if (ttsState == TTSState.PLAY) Color.DarkGray else Color.White,
         tween()
@@ -114,8 +120,8 @@ private fun ColumnScope.PlayPauseButton(btnModifier: Modifier, baseViewModel: Ba
             TTSState.LOADING -> {
                 CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
-                    color = Color.White,
-                    strokeWidth = 2.dp,
+                    color = Color.DarkGray,
+                    strokeWidth = 2.5.dp,
                 )
             }
         }
