@@ -9,7 +9,7 @@ import java.io.File
 object TTSModel {
     private var tts: OfflineTts? = null
     var isGeneratingAudio = false
-//    const val url = "https://hostbet.moreproductive.in/models/tts/kokoro/kokoro-en-v0_19.zip"
+    //    const val url = "https://hostbet.moreproductive.in/models/tts/kokoro/kokoro-en-v0_19.zip"
     const val url = "http://localhost:8080/kokoro-en-v0_19.zip"
 
     fun getInstance(): OfflineTts {

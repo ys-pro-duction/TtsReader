@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -32,9 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier as Modi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -46,81 +47,100 @@ import tts.TTSState
 @Preview
 @Composable
 fun RowScope.PlaybackController(
-    modifier: Modi = Modifier,
-    baseViewModel: BaseViewModel,
-    onGeneratePlayClick: () -> Unit,
-    onResetClick: () -> Unit,
-    onPreviousClick: () -> Unit,
-    onNextClick: () -> Unit,
-    enabled: Boolean = true
+    modifier: Modifier = Modifier.fillMaxSize().weight(1f).clip(shape = RoundedCornerShape(16.dp))
+        .background(MaterialTheme.colors.primary, shape = RoundedCornerShape(16.dp)).padding(20.dp),
+    baseViewModel: BaseViewModel
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.SpaceEvenly
+        modifier = modifier.fillMaxWidth().padding(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        val btnModifier = remember {
-            Modifier.fillMaxSize().weight(1f).padding(4.dp)
-                .background(Color.DarkGray, shape = RoundedCornerShape(16.dp)).padding(20.dp)
+        val btnColor = MaterialTheme.colors.primary
+        val btnModifier = remember(MaterialTheme.colors) {
+            Modifier.fillMaxSize().weight(1f).clip(shape = RoundedCornerShape(16.dp))
+                .background(btnColor, shape = RoundedCornerShape(16.dp)).padding(20.dp)
         }
-        PlayPauseButton(btnModifier = btnModifier, baseViewModel, { onGeneratePlayClick() })
-        Row(modifier = Modifier.fillMaxSize().weight(1f)) {
+        PlayPauseButton(baseViewModel)
+        Row(
+            modifier = Modifier.fillMaxSize().weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Arrow back",
-                modifier = Modifier.clickable{baseViewModel.previousSpeech()}.then(btnModifier),
-                tint = Color.White
+                modifier = Modifier.clip(shape = RoundedCornerShape(16.dp))
+                    .clickable { baseViewModel.previousSpeech() }.fillMaxSize().weight(1f)
+                    .clip(shape = RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(16.dp))
+                    .padding(20.dp),
+                tint = MaterialTheme.colors.primary
             )
+
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = "Arrow forward",
-                modifier = Modifier.clickable{ CoroutineScope(Dispatchers.Default).launch { baseViewModel.nextSpeech() } }.then(btnModifier),
-                tint = Color.White
+                modifier = Modifier.clip(shape = RoundedCornerShape(16.dp))
+                    .clickable { CoroutineScope(Dispatchers.Default).launch { baseViewModel.nextSpeech() } }
+                    .fillMaxSize().weight(1f)
+                    .clip(shape = RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(16.dp))
+                    .padding(20.dp),
+                tint = MaterialTheme.colors.primary
 
             )
 
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = "restart",
-                modifier = Modifier.clickable{baseViewModel.restartWholeSpeech()}.then(btnModifier),
-                tint = Color.White
+                modifier = Modifier.clip(shape = RoundedCornerShape(16.dp))
+                    .clickable { baseViewModel.restartWholeSpeech() }.fillMaxSize().weight(1f)
+                    .clip(shape = RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colors.onSecondary, shape = RoundedCornerShape(16.dp))
+                    .padding(20.dp),
+                tint = MaterialTheme.colors.primary
             )
         }
     }
 }
 
 @Composable
-private fun ColumnScope.PlayPauseButton(btnModifier: Modi, baseViewModel: BaseViewModel, onGeneratePlayClick: () -> Unit) {
+private fun ColumnScope.PlayPauseButton(baseViewModel: BaseViewModel) {
     val ttsState by baseViewModel.ttsState.collectAsState(TTSState.STOP)
-    val animateBackgroundColor = animateColorAsState(if (ttsState == TTSState.PLAY) Color.DarkGray else Color.White,
+    val animateBackgroundColor = animateColorAsState(
+        if (ttsState == TTSState.PLAY) MaterialTheme.colors.onSecondary else MaterialTheme.colors.primary,
         tween()
     )
-    Box(Modifier.clickable {
-        onGeneratePlayClick()
-        if (ttsState == TTSState.PLAY) {
-            baseViewModel.stopTTS()
-        } else if (ttsState == TTSState.STOP) {
-            baseViewModel.startTTS()
+    Box(
+        Modifier.clip(shape = RoundedCornerShape(16.dp)).clickable {
+            if (ttsState == TTSState.PLAY) {
+                baseViewModel.stopTTS()
+            } else if (ttsState == TTSState.STOP) {
+                baseViewModel.startTTS()
+            }
         }
-    }.then(Modifier.fillMaxSize().weight(1f).padding(4.dp)
-        .background(animateBackgroundColor.value, shape = RoundedCornerShape(16.dp)).padding(20.dp)), contentAlignment = Alignment.Center) {
+            .fillMaxSize().weight(1f)
+            .background(animateBackgroundColor.value, shape = RoundedCornerShape(16.dp))
+            .padding(20.dp), contentAlignment = Alignment.Center
+    ) {
         when (ttsState) {
             TTSState.PLAY -> Icon(
                 imageVector = Icons.Default.Pause,
                 contentDescription = "Play",
                 modifier = Modifier.fillMaxSize(),
-                tint = Color.White
+                tint = MaterialTheme.colors.primary
             )
 
             TTSState.STOP -> Icon(
                 imageVector = Icons.Default.PlayArrow,
                 contentDescription = "Pause",
                 modifier = Modifier.fillMaxSize(),
-                tint = Color.DarkGray
+                tint = MaterialTheme.colors.surface
             )
 
             TTSState.LOADING -> {
                 CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
-                    color = Color.DarkGray,
+                    color = MaterialTheme.colors.surface,
                     strokeWidth = 2.5.dp,
                 )
             }

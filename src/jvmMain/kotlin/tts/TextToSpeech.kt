@@ -1,6 +1,6 @@
 package tts
 
-import AudioData
+import tts.AudioData
 import BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +33,6 @@ class TextToSpeech {
         voiceSpeed: Float,
         textSegment: TextSegment
     ) {
-//        if (baseViewModel.ttsState.value != TTSState.PLAY) return
         queue.peek()?.let {
             if (it.first == idx && TTSModel.isGeneratingAudio) {
                 while (!isLoaded(idx,speakerId,voiceSpeed,textSegment)){
@@ -146,7 +145,6 @@ class TextToSpeech {
                 if (currentIdx+2 < size)queue.add(Pair(currentIdx+2, baseViewModel.sentencesOfTextSegments.value[currentIdx+2]))
             }
         }
-//        if (queue.size > 2) return
         CoroutineScope(Dispatchers.IO).launch {
             while (queue.isNotEmpty()){
                 if (baseViewModel.ttsState.value != TTSState.PLAY) return@launch
@@ -155,15 +153,15 @@ class TextToSpeech {
                 }
                 val pair = queue.peek() ?: break
                 if (pair.first !in baseViewModel.currentHighlightWordIdx.value+1..baseViewModel.currentHighlightWordIdx.value+2) {
-                    queue.remove()
+                    queue.poll()
                     continue
                 }
                 if (isLoaded(pair.first, baseViewModel.selectedSpeaker.value.id, baseViewModel.speechSpeed.value, pair.second)) {
-                    queue.remove()
+                    queue.poll()
                     continue
                 } else {
                     generateAudioForIdx(pair.first, baseViewModel.selectedSpeaker.value.id, baseViewModel.speechSpeed.value, pair.second)
-                    queue.remove()
+                    queue.poll()
                 }
             }
         }

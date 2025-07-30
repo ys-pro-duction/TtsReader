@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,7 +32,6 @@ import components.AudioVisualize
 import components.Controller
 import components.DownloadModelDialog
 import components.MainTextArea
-import components.Modifier
 import tts.Server
 import tts.TTSModel
 import tts.TTSState
@@ -90,7 +90,8 @@ fun main() = application {
                         AudioVisualize(
                             modifier = Modifier
                                 .offset(5.dp)
-                                .width(90.dp), barData = barData.value.toList()
+                                .width(90.dp), barData = barData.value.toList(),
+                            barColor = MaterialTheme.colors.primary
                         )
                     }
                 }

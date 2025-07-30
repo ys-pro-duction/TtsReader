@@ -1,3 +1,5 @@
+package tts
+
 import utils.TextSegment
 
 class AudioData(
@@ -7,4 +9,4 @@ class AudioData(
     val audioDuration: Float,
     val speakerId: Int,
     val voiceSpeed: Float,
-    )
+)

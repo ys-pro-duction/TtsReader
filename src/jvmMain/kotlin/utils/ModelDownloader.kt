@@ -2,6 +2,7 @@ package utils
 
 import java.io.File
 import java.io.InputStream
+import java.net.URI
 import java.net.URL
 import java.util.zip.ZipInputStream
 
@@ -24,7 +25,7 @@ class ModelDownloader(
         println("download: Start")
         listener.onDownloadStart()
         try {
-            val connection = URL(url).openConnection()
+            val connection = URI.create(url).toURL().openConnection()
             val size = connection.contentLengthLong
             listener.onModelSize(size/1024/1024)
             connection.getInputStream().use { input ->
@@ -33,7 +34,7 @@ class ModelDownloader(
         } catch (e: Exception) {
             e.printStackTrace()
             listener.onDownloadError("Download failed: ${e.message}")
-            File(outputDir).deleteRecursively()
+//            File(outputDir).deleteRecursively()
             return
         }
     }

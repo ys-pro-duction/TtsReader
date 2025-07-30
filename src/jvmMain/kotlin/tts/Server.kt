@@ -45,12 +45,8 @@ class Server(private val baseViewModel: BaseViewModel) {
             reader.read(body, 0, contentLength)
             val text = String(body).replace("\n\n","\n")
 
-            println("Received text: $text")
-//            baseViewModel.updateTextValue("")
             baseViewModel.updateTextValue(text)
-//            baseViewModel.stopTTS()
             baseViewModel.restartWholeSpeech()
-            // Respond with a basic HTTP 200 OK
             val response = """
             HTTP/1.1 200 OK
             Content-Type: text/plain

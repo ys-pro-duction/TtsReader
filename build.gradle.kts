@@ -19,7 +19,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(17)
+//    jvmToolchain(17)
     jvm {
         withJava()
     }
@@ -33,6 +33,7 @@ kotlin {
                 implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.8.2")
                 implementation(compose.material3)
                 implementation(compose.preview)
+                implementation("com.russhwolf:multiplatform-settings:1.3.0")
 
             }
         }

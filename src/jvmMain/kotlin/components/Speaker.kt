@@ -14,6 +14,10 @@ enum class Speaker(name: String, val id: Int) {
     Moscow("Moscow", 10);
 
     companion object {
+        fun getById(id: Int): Speaker {
+            return all.firstOrNull { it.id == id } ?: Raquel
+        }
+
         val all = listOf(
             Raquel,
             Monica,
@@ -28,4 +32,5 @@ enum class Speaker(name: String, val id: Int) {
             Moscow
         )
     }
+
 }

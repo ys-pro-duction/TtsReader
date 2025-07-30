@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.onClick
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,7 +32,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier as Modi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -45,7 +46,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun SpeakerSelecter(backgroundColor: Color = Color(0xff151515), modifier: Modi,baseViewModel: BaseViewModel) {
+fun SpeakerSelecter(backgroundColor: Color = MaterialTheme.colors.surface, modifier: Modifier,baseViewModel: BaseViewModel) {
     val speakerInteraction = remember { MutableInteractionSource() }
     val showAllSpeaker = remember { mutableStateOf(false) }
     val isHoverEnabled = remember { mutableStateOf(true) }
@@ -60,7 +61,7 @@ fun SpeakerSelecter(backgroundColor: Color = Color(0xff151515), modifier: Modi,b
         modifier = modifier.offset(animateOffest.value.x.dp, animateOffest.value.y.dp).requiredSize(
             width = animateGridWith.value * 0.9f,
             height = animateGridWith.value
-        ).background(backgroundColor, RoundedCornerShape(12.dp)).hoverable(speakerInteraction)
+        ).background(if (showAllSpeaker.value) backgroundColor else Color.Transparent, RoundedCornerShape(12.dp)).hoverable(speakerInteraction)
             .animateContentSize().then(
                 if (showAllSpeaker.value) Modifier.border(
                     1.dp,
@@ -94,12 +95,12 @@ fun SpeakerItem(name: String, id: Int, selected: Boolean, onClick: (Int) -> Unit
         Image(
             painterResource("s_i_$id.jpg"), null, modifier = Modifier.requiredSize(80.dp).then(
                 if (selected) Modifier
-                    .border(1.dp, Color.White, CircleShape)
+                    .border(1.dp, MaterialTheme.colors.primary, CircleShape)
                     .padding(4.dp) else Modifier.padding(4.dp)
             ).then(Modifier.clip(CircleShape)), contentScale = ContentScale.FillBounds
         )
         Text(
-            name, modifier = Modifier.padding(top = 2.dp), color = Color.White
+            name, modifier = Modifier.padding(top = 2.dp), color = MaterialTheme.colors.primary
         )
     }
 }

@@ -56,7 +56,7 @@
 //            TTS.SPEED
 //        ) else null
 //        val audioDuration = audio?.let { audio.samples.size / audio.sampleRate.toFloat() } ?: 0f
-//        TTS.audioLoaded[index] = AudioData(
+//        TTS.audioLoaded[index] = tts.AudioData(
 //            text,
 //            audio?.let { floatArrayToByteArray(audio.samples) } ?: ByteArray(0),
 //            audio?.sampleRate ?: 0,
@@ -137,7 +137,7 @@
 //        var currentWordIdx = 0
 //        var isProcessing = false
 //        var isPlaying = false
-//        val audioLoaded = HashMap<Int, AudioData>()
+//        val audioLoaded = HashMap<Int, tts.AudioData>()
 //        val audioLoadingQueue: Queue<Pair<Int, String>> = LinkedList()
 //        var line: SourceDataLine? = null
 //        var SID = 0
@@ -172,7 +172,7 @@
 //            tts?.release()
 //        }
 //
-//        private fun getAudioSourceLine(audioData: AudioData): SourceDataLine {
+//        private fun getAudioSourceLine(audioData: tts.AudioData): SourceDataLine {
 //            if (line != null) return line!!
 //            val format = AudioFormat(audioData.sampleRate.toFloat(), 16, 1, true, false)
 //            val info = DataLine.Info(SourceDataLine::class.java, format)

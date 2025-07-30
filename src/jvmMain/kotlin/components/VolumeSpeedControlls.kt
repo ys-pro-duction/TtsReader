@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
@@ -22,16 +23,19 @@ import androidx.compose.material3.SliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.Modifier as Modi
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun VolumeSpeedControlls(modifier: Modi = Modifier.width(200.dp).padding(horizontal = 16.dp), baseViewModel: BaseViewModel) {
+fun VolumeSpeedControlls(
+    modifier: Modifier = Modifier.width(200.dp).padding(horizontal = 16.dp),
+    baseViewModel: BaseViewModel
+) {
     Column(modifier = modifier) {
         VolumeSlider(baseViewModel)
         SpeedSlider(baseViewModel)
@@ -40,7 +44,7 @@ fun VolumeSpeedControlls(modifier: Modi = Modifier.width(200.dp).padding(horizon
 
 @Composable
 private fun MySlider(
-    modifier: Modi = Modifier,
+    modifier: Modifier = Modifier,
     value: Float = 0f,
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
@@ -56,9 +60,13 @@ private fun MySlider(
         thumb = {
             Text(
                 String.format(null, valueFormat, value),
-                color = Color.White,
+                color = MaterialTheme.colors.primary,
                 modifier = Modifier.size(28.dp, 26.dp)
-                    .background(Color(0xff575757), RoundedCornerShape(4.dp)),
+                    .shadow(
+                        4.dp,
+                        RoundedCornerShape(4.dp),
+                        ambientColor = MaterialTheme.colors.primary.copy(0.5f)
+                    ).background(MaterialTheme.colors.secondary, RoundedCornerShape(4.dp)),
                 textAlign = TextAlign.Center
             )
         },
@@ -66,7 +74,8 @@ private fun MySlider(
             Box(modifier = Modifier.fillMaxWidth())
         })
 }
-fun Modi.mouseScrollable(onScroll: (Float) -> Unit): Modi = composed {
+
+fun Modifier.mouseScrollable(onScroll: (Float) -> Unit): Modifier = composed {
     pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
@@ -82,10 +91,10 @@ fun Modi.mouseScrollable(onScroll: (Float) -> Unit): Modi = composed {
 
 
 @Composable
-private fun ColumnScope.VolumeSlider(baseViewModel: BaseViewModel){
+private fun ColumnScope.VolumeSlider(baseViewModel: BaseViewModel) {
     val volume = baseViewModel.volume.collectAsState()
     Text(
-        "Volume:", color = Color.White, fontWeight = FontWeight.Bold
+        "Volume:", color = MaterialTheme.colors.primary, fontWeight = FontWeight.Bold
     )
     Box(
         modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
@@ -93,13 +102,13 @@ private fun ColumnScope.VolumeSlider(baseViewModel: BaseViewModel){
         Row(Modifier.fillMaxWidth()) {
             Spacer(
                 modifier = Modifier.weight(volume.value + 10f).height(24.dp).background(
-                    Color.White.copy(0.15f),
+                    MaterialTheme.colors.secondary,
                     shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
                 )
             )
             Spacer(
                 modifier = Modifier.weight(110f - volume.value).height(24.dp).background(
-                    Color.White.copy(0.05f),
+                    MaterialTheme.colors.secondary.copy(0.6f),
                     shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
                 )
             )
@@ -120,11 +129,12 @@ private fun ColumnScope.VolumeSlider(baseViewModel: BaseViewModel){
             })
     }
 }
+
 @Composable
-private fun ColumnScope.SpeedSlider(baseViewModel: BaseViewModel){
+private fun ColumnScope.SpeedSlider(baseViewModel: BaseViewModel) {
     val speed = baseViewModel.speechSpeed.collectAsState()
     Text(
-        "Speech speed:", color = Color.White, fontWeight = FontWeight.Bold
+        "Speech speed:", color = MaterialTheme.colors.primary, fontWeight = FontWeight.Bold
     )
     Box(
         modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
@@ -132,13 +142,13 @@ private fun ColumnScope.SpeedSlider(baseViewModel: BaseViewModel){
         Row(Modifier.fillMaxWidth()) {
             Spacer(
                 modifier = Modifier.weight(speed.value + 0.02f).height(24.dp).background(
-                    Color.White.copy(0.15f),
+                    MaterialTheme.colors.secondary,
                     shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
                 )
             )
             Spacer(
                 modifier = Modifier.weight(3.1f - speed.value).height(24.dp).background(
-                    Color.White.copy(0.05f),
+                    MaterialTheme.colors.secondary.copy(0.6f),
                     shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
                 )
             )

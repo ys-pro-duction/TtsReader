@@ -40,8 +40,6 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
         val delimiter = match.value
 
         result.add(TextSegment(segmentText, delimiter))
-//        if (segmentText.isNotEmpty()) {
-//        }
 
         lastIndex = match.range.last + 1
     }
