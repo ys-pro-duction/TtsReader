@@ -18,6 +18,7 @@ import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,11 +46,12 @@ import java.io.File
 @ExperimentalComposeUiApi
 @Composable
 fun WindowScope.DownloadModelDialog(url: String, onDismissRequest: () -> Unit) {
-    WindowDraggableArea(modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.5f))) {
+    WindowDraggableArea(modifier = Modifier.fillMaxSize().background(Brush.radialGradient(listOf(
+        MaterialTheme.colors.primary.copy(0.3f),MaterialTheme.colors.primary.copy(0.05f))))) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(
-                Modifier.width(width = 350.dp).heightIn(250.dp, 300.dp)
-                    .background(Color(0xFF151515))
+                Modifier.width(width = 350.dp)
+                    .background(MaterialTheme.colors.background, shape = RoundedCornerShape(8.dp))
                     .border(
                         BorderStroke(
                             .5.dp,
@@ -57,26 +59,26 @@ fun WindowScope.DownloadModelDialog(url: String, onDismissRequest: () -> Unit) {
                                 listOf(
                                     Color.Transparent,
                                     Color.Gray,
-                                    Color.White
+                                    MaterialTheme.colors.primary
                                 )
                             )
-                        )
+                        ),RoundedCornerShape(8.dp)
                     ).animateContentSize()
             ) {
 
                 Text(
                     text = "Download text-to-speech model",
                     modifier = Modifier.fillMaxWidth().background(
-                        Color.Black.copy(0.2f),
+                        MaterialTheme.colors.background,
                         shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                     ).padding(16.dp),
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp,
-                    color = Color.White,
+                    color = MaterialTheme.colors.primary,
                     fontWeight = FontWeight.Bold
                 )
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier,
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -136,13 +138,14 @@ private fun DialogContent(
     if (showInstruction) {
         Text(
             "This program requires a text-to-speech model to function. Please click the download button to begin. (Download size: ~350 MB)",
-            color = Color.White,
+            color = MaterialTheme.colors.primary,
             modifier = Modifier.padding(16.dp)
         )
         if (error.value.isNotEmpty()) Text(
             "Error while downloading: ${error.value}",
-            color = Color.Red,
-            modifier = Modifier.padding(16.dp)
+            color = Color.Red.copy(0.9f),
+            modifier = Modifier.padding(16.dp),
+            fontSize = 14.sp
         )
         Button(
             {
@@ -153,8 +156,8 @@ private fun DialogContent(
             },
             modifier = Modifier.padding(bottom = 12.dp),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.DarkGray,
-                contentColor = Color.White
+                backgroundColor = MaterialTheme.colors.onSecondary,
+                contentColor = MaterialTheme.colors.primary
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
@@ -165,16 +168,16 @@ private fun DialogContent(
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Downloading: $currentDownloadingFile", color = Color.White)
+            Text("Downloading: $currentDownloadingFile", color = MaterialTheme.colors.primary)
             LinearProgressIndicator(
                 progress = progressBarProgress.value,
                 modifier = Modifier.height(8.dp).fillMaxWidth(),
-                color = Color.White,
+                color = MaterialTheme.colors.primary,
                 strokeCap = StrokeCap.Round
             )
             Text(
                 "${downloadedSize.value} MB / ${modelSize.value} MB",
-                color = Color.White,
+                color = MaterialTheme.colors.primary,
                 modifier = Modifier.align(Alignment.End)
             )
             DestinationText(destination)
@@ -187,7 +190,7 @@ private fun DialogContent(
 private fun DestinationText(destination: File) {
     Text(
         "location: ${destination.absolutePath}",
-        color = Color.White,
+        color = MaterialTheme.colors.primary,
         modifier = Modifier.padding(top = 16.dp)
     )
 }

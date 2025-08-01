@@ -7,13 +7,13 @@ import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import java.io.File
 
 object TTSModel {
-    private var tts: OfflineTts? = null
+    private var offlineTts: OfflineTts? = null
     var isGeneratingAudio = false
     //    const val url = "https://hostbet.moreproductive.in/models/tts/kokoro/kokoro-en-v0_19.zip"
     const val url = "http://localhost:8080/kokoro-en-v0_19.zip"
 
     fun getInstance(): OfflineTts {
-        if (tts != null) return tts!!
+        if (offlineTts != null) return offlineTts!!
         val dir = "./kokoro-en-v0_19/"
         val model = "${dir}model.onnx"
         val voices = "${dir}voices.bin"
@@ -28,16 +28,11 @@ object TTSModel {
                 .setProvider("cuda").setDebug(true).build()
 
         val config = OfflineTtsConfig.builder().setModel(modelConfig).build()
-        val libPath = File("libs/sherpa-onnx-jni.dll").absolutePath
-        println(libPath)
-        System.setProperty("java.library.path", libPath)
-        System.load(libPath)
-        tts = OfflineTts(config)
-        return tts as OfflineTts
+        offlineTts = tts.OfflineTts(config)
+        return offlineTts as OfflineTts
     }
-
     fun freeResources() {
-        tts?.release()
+        offlineTts?.release()
     }
 
     suspend fun isModelExist(): Boolean {

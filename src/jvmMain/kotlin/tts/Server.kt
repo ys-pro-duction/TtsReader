@@ -14,12 +14,17 @@ import java.net.Socket
 class Server(private val baseViewModel: BaseViewModel) {
 
     fun startSimpleTtsServer(port: Int = 9024) {
-        val server = ServerSocket(port)
-        CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                val socket = server.accept()
-                handleClient(socket)
+        try {
+            val server = ServerSocket(port)
+            CoroutineScope(Dispatchers.IO).launch {
+                while (true) {
+                    val socket = server.accept()
+                    handleClient(socket)
+                }
             }
+        }catch (e: Exception) {
+            e.printStackTrace()
+            println("Error starting server: ${e.message}")
         }
     }
 
