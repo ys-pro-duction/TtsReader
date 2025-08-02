@@ -271,3 +271,6 @@ bin/
 /wix311/WixVSExtension.dll
 /wix311/WixVSExtension.MSBuild12.dll
 /wix311/WixVSExtension.MSBuild14.dll
+/.idea/artifacts/TtsReader_desktop_1_0_SNAPSHOT.xml
+/.idea/valkyrie_settings.xml
+/.kotlin/metadata/kotlinTransformedMetadataLibraries/org.jetbrains.kotlin-kotlin-stdlib-2.2.0-commonMain-3ud7Cw.klib
