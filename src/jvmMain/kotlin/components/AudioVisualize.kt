@@ -11,23 +11,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.util.fastForEachIndexed
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
 fun BoxScope.AudioVisualize(
-    modifier: Modifier = components.Modifier,
+    modifier: Modifier = Modifier,
     barData: List<Float>,
     gap: Float = 20f,
     barWidth: Float = 10f,
-    height: Float = 100f
+    height: Float = 100f,
+    barColor: Color
 ) {
     val animatables = remember(barData.size) {
         List(barData.size) { Animatable(0f) }
@@ -57,11 +55,10 @@ fun BoxScope.AudioVisualize(
             }
         }
     }
-
     Canvas(modifier = modifier.align(Alignment.Center)) {
         animatables.fastForEachIndexed { index, animatable ->
             drawLine(
-                color = Color.White.copy((animatable.value/15).coerceIn(0.5f,1f)),
+                color = barColor,
                 start = Offset(gap * index, -animatable.value / 2),
                 end = Offset(gap * index, animatable.value),
                 strokeWidth = barWidth,

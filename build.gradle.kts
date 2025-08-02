@@ -19,7 +19,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
     jvm {
         withJava()
     }
@@ -28,11 +28,11 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation(files("libs/sherpa-onnx-v1.10.46-java17.jar"))
-                implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.5.0")
-                implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.8.2")
+                implementation(files("libs/sherpa-onnx-v1.12.7-java21.jar"))
+//                implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.5.0")
                 implementation(compose.material3)
                 implementation(compose.preview)
+                implementation("com.russhwolf:multiplatform-settings:1.3.0")
 
             }
         }
@@ -46,50 +46,34 @@ compose.desktop {
     application {
         mainClass = "MainKt"
 
-        jvmArgs += listOf("-Djava.library.path=$projectDir/libs")
-
-
         nativeDistributions {
             targetFormats(
-                TargetFormat.Dmg,
+//                TargetFormat.Dmg,
                 TargetFormat.Msi,
-                TargetFormat.Deb
+//                TargetFormat.Deb
             )
-            packageName = "TtsReader"
+            packageName = "TtsReader - Text to Speech"
             packageVersion = "1.0.0"
-
             windows {
                 dirChooser = true
                 menuGroup = "TtsReader"
                 // Ensure native libraries are included
                 includeAllModules = true
+                shortcut = true
+                menu = true
+                iconFile.set(project.file("src/jvmMain/resources/app_icon.ico")) // your .ico file
+                appResourcesRootDir.set(project.layout.projectDirectory.dir("sherpa-lib"))
 
-                // Add distribution-specific JVM arguments
+//                // Add distribution-specific JVM arguments
                 jvmArgs += listOf(
-                    "-Djava.library.path=libs",
-                    "-Djna.library.path=libs"
+                    "-Djava.library.path=app/resources;libs"
                 )
+
             }
-
-            // Specify resources to include
-//            modules("libs/sherpa-onnx-jni.dll")
-
-            // Copy native libraries to the distribution
-//            distributionPath.set(project.buildDir.resolve("dist"))
-
-            appResourcesRootDir.set(project.layout.projectDirectory.dir("libs"))
         }
-    }
-}
-// Add a task to copy native libraries to the distribution
-tasks.register<Copy>("copyNativeLibs") {
-    from("libs") {
-        include("*.dll")
-    }
-    into("${buildDir}/compose/binaries/main/app/${rootProject.name}/libs")
-}
 
-// Make the distribution task depend on copyNativeLibs
-//tasks.named("createDistributable") {
-//    dependsOn("copyNativeLibs")
-//}
+    }
+}
+tasks.register("buildDestributableAndRun") {
+    dependsOn("packageDistributionForCurrentOS", "runDistributable")
+}

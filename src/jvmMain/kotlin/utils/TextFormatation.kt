@@ -5,7 +5,6 @@ data class TextSegment(val text: String, val delimiter: String)
 fun splitSmartWithDelimiters(input: String): List<TextSegment> {
     val abbreviations = listOf("e.g.", "i.e.", "etc.", "vs.", "Mr.", "Dr.")
     val placeholderMap = mutableMapOf<String, String>()
-
     // Replace known abbreviations with placeholders
     var modified = input
     abbreviations.forEachIndexed { index, abbr ->
@@ -17,10 +16,12 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
     // Replace dotted identifiers (e.g., org.example.Class) with temporary tokens
     val dottedIdentifierRegex = Regex("""\b(?:[a-zA-Z_][\w]*\.)+[a-zA-Z_][\w]*\b""")
     val dottedMap = mutableMapOf<String, String>()
+    val remainingDotIds = ArrayList<Int>()
     var idCount = 0
     modified = dottedIdentifierRegex.replace(modified) { matchResult ->
         val placeholder = "__DOT_ID_$idCount"
         dottedMap[placeholder] = matchResult.value
+        remainingDotIds.add(idCount)
         idCount++
         placeholder
     }
@@ -37,11 +38,8 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
         val end = match.range.first
         val segmentText = modified.substring(lastIndex, end)
         val delimiter = match.value
-        println(end)
 
         result.add(TextSegment(segmentText, delimiter))
-//        if (segmentText.isNotEmpty()) {
-//        }
 
         lastIndex = match.range.last + 1
     }
@@ -57,9 +55,14 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
     // Restore identifiers and abbreviations
     return result.map { textSegment ->
         var restored = textSegment.text
-        dottedMap.forEach { (placeholder, original) ->
-            restored = restored.replace(placeholder, original)
+        for (i in remainingDotIds.size - 1 downTo 0) {
+            val key = "__DOT_ID_${remainingDotIds[i]}"
+            if (restored.contains(key)) {
+                remainingDotIds.remove(remainingDotIds[i])
+            }
+            restored = restored.replaceFirst(key, dottedMap[key].toString())
         }
+
         placeholderMap.forEach { (placeholder, abbr) ->
             restored = restored.replace(placeholder, abbr)
         }
