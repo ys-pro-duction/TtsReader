@@ -39,6 +39,7 @@ import androidx.compose.ui.window.WindowScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tts.TTSModel
 import utils.ModelDownloader
 import java.io.File
 
@@ -98,12 +99,10 @@ private fun DialogContent(
     val downloadedSize = remember { mutableStateOf(0L) }
     val modelSize = remember { mutableStateOf(0L) }
     val error = remember { mutableStateOf("") }
-    val destination = remember { File("kokoro-en-v0_19") }
+    val destination = remember { File(TTSModel.modelDir.absolutePath) }
     val progressBarProgress = remember { mutableStateOf(0f) }
     val downloader = remember {
         ModelDownloader(
-            url,
-            outputDir = destination.name,
             object : ModelDownloader.ModelDownloaderListener {
                 override fun onDownloadStart() {
                     showInstruction = false

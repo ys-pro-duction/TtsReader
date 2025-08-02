@@ -1,5 +1,6 @@
 package utils
 
+import tts.TTSModel
 import java.io.File
 import java.io.InputStream
 import java.net.URI
@@ -7,8 +8,6 @@ import java.net.URL
 import java.util.zip.ZipInputStream
 
 class ModelDownloader(
-    val url: String,
-    val outputDir: String,
     private val listener: ModelDownloaderListener
 ) {
     interface ModelDownloaderListener {
@@ -25,16 +24,15 @@ class ModelDownloader(
         println("download: Start")
         listener.onDownloadStart()
         try {
-            val connection = URI.create(url).toURL().openConnection()
+            val connection = URI.create(TTSModel.url).toURL().openConnection()
             val size = connection.contentLengthLong
             listener.onModelSize(size/1024/1024)
             connection.getInputStream().use { input ->
-                unzipFile(input, File(outputDir),size)
+                unzipFile(input, File(TTSModel.modelDir.absolutePath),size)
             }
         } catch (e: Exception) {
             e.printStackTrace()
             listener.onDownloadError("Download failed: ${e.message}")
-//            File(outputDir).deleteRecursively()
             return
         }
     }
@@ -49,12 +47,6 @@ class ModelDownloader(
                     outFile.mkdirs()
                 } else {
                     listener.onUnzippedFileName(outFile.name)
-                    outFile.parentFile.mkdirs()
-//                    outFile.outputStream().use { out ->
-//                        zipIn.copyTo(out)
-//                    }
-//                    downloadedSize += outFile.length()
-
                     outFile.outputStream().use {
                         while (zipIn.available() == 1){
                             val buffer = ByteArray(1024*1024)

@@ -122,7 +122,7 @@ class BaseViewModel {
     }
 
     var job: Job? = null
-    fun startTTS() {
+    fun startTTS(forward: Boolean = true) {
         job?.cancel(null)
         job = CoroutineScope(Dispatchers.IO).launch {
             waitWhileTextFormating()
@@ -130,16 +130,34 @@ class BaseViewModel {
             setTTSState(TTSState.PLAY)
             val idx = max(0, currentHighlightWordIdx.value)
             _currentHighlightWordIdx.value = idx
-            if (idx < 0 || idx >= sentencesOfTextSegments.value.size ||!textToSpeech.isValidText(sentencesOfTextSegments.value[idx])) {
-                delay(200)
-                if (isActive) nextSpeech(false)
+//            if (idx < 0 || idx >= sentencesOfTextSegments.value.size || !textToSpeech.isValidText(
+//                    sentencesOfTextSegments.value[idx]
+//                )
+//            ) {
+//                delay(300)
+//                if (isActive) nextSpeech(false)
+//                return@launch
+//            }
+            if (idx < 0 || idx >= sentencesOfTextSegments.value.size) {
+                if (isActive) {
+                    if (forward) nextSpeech(false)
+                    else previousSpeech()
+                }
+                return@launch
+            } else if (!textToSpeech.isValidText(
+                    sentencesOfTextSegments.value[idx]
+                )
+            ) {
+                if (forward) nextSpeech(false)
+                else previousSpeech()
                 return@launch
             }
             textToSpeech.generateAudioForIdx(
                 idx, selectedSpeaker.value.id, speechSpeed.value, sentencesOfTextSegments.value[idx]
             )
-            textToSpeech.loadNextInAdvance(this@BaseViewModel)
-            val isSuccessfullyCompleted = textToSpeech.playAudio(idx, baseViewModel = this@BaseViewModel)
+            if (isActive) textToSpeech.loadNextInAdvance(this@BaseViewModel)
+            val isSuccessfullyCompleted =
+                if (isActive) textToSpeech.playAudio(idx, baseViewModel = this@BaseViewModel) else return@launch
             if (isSuccessfullyCompleted && idx == max(
                     0, currentHighlightWordIdx.value
                 ) && ttsState.value == TTSState.PLAY
@@ -155,7 +173,7 @@ class BaseViewModel {
         if (_currentHighlightWordIdx.value != 0) {
             _currentHighlightWordIdx.value = _currentHighlightWordIdx.value - 1
         }
-        startTTS()
+        startTTS(false)
     }
 
     suspend fun nextSpeech(byUser: Boolean = true) {

@@ -22,12 +22,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
+import icons.ArrowBack
+import icons.ArrowForward
+import icons.Pause
+import icons.Play
+import icons.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -66,7 +65,7 @@ fun RowScope.PlaybackController(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = ArrowBack,
                 contentDescription = "Arrow back",
                 modifier = Modifier.clip(shape = RoundedCornerShape(16.dp))
                     .clickable { baseViewModel.previousSpeech() }.fillMaxSize().weight(1f)
@@ -77,7 +76,7 @@ fun RowScope.PlaybackController(
             )
 
             Icon(
-                imageVector = Icons.Default.ArrowForward,
+                imageVector = ArrowForward,
                 contentDescription = "Arrow forward",
                 modifier = Modifier.clip(shape = RoundedCornerShape(16.dp))
                     .clickable { CoroutineScope(Dispatchers.Default).launch { baseViewModel.nextSpeech() } }
@@ -90,7 +89,7 @@ fun RowScope.PlaybackController(
             )
 
             Icon(
-                imageVector = Icons.Default.Refresh,
+                imageVector = Refresh,
                 contentDescription = "restart",
                 modifier = Modifier.clip(shape = RoundedCornerShape(16.dp))
                     .clickable { baseViewModel.restartWholeSpeech() }.fillMaxSize().weight(1f)
@@ -124,14 +123,14 @@ private fun ColumnScope.PlayPauseButton(baseViewModel: BaseViewModel) {
     ) {
         when (ttsState) {
             TTSState.PLAY -> Icon(
-                imageVector = Icons.Default.Pause,
+                imageVector = Pause,
                 contentDescription = "Play",
                 modifier = Modifier.fillMaxSize(),
                 tint = MaterialTheme.colors.primary
             )
 
             TTSState.STOP -> Icon(
-                imageVector = Icons.Default.PlayArrow,
+                imageVector = Play,
                 contentDescription = "Pause",
                 modifier = Modifier.fillMaxSize(),
                 tint = MaterialTheme.colors.surface
