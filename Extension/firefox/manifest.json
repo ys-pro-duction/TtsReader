@@ -1,0 +1,34 @@
+{
+  "manifest_version": 2,
+  "name": "TTS Reader",
+  "version": "1.0",
+  "description": "Send selected text to your TtsReader application",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "webRequest",
+    "webRequestBlocking",
+    "notifications",
+    "http://localhost:9024/*"
+  ],
+  "background": {
+    "scripts": ["index.js"]
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    },
+    "default_title": "TtsReader"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{d56a5f99-1234-5678-abcd-ef1234567890}",
+      "strict_min_version": "58.0"
+    }
+  }
+}

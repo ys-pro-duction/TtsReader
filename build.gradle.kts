@@ -53,7 +53,7 @@ compose.desktop {
 //                TargetFormat.Deb
             )
             packageName = "TtsReader - Text to Speech"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.1"
             windows {
                 dirChooser = true
                 menuGroup = "TtsReader"

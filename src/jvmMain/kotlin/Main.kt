@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -57,7 +58,7 @@ fun main() = application {
         }
     }
     Window(
-        title = "Text to speech", undecorated = true, transparent = true, onCloseRequest = {
+        title = "Text to speech", undecorated = true, transparent = false, onCloseRequest = {
         TTSModel.freeResources()
         exitApplication()
     }, state = windowState) {
@@ -66,7 +67,7 @@ fun main() = application {
         val isDarkTheme by baseViewModel.isDarkMode.collectAsState()
         TTSReaderTheme(isDarkTheme) {
             Surface(
-                shape = RoundedCornerShape(12.dp), border = BorderStroke(
+                border = BorderStroke(
                     1.dp, Brush.linearGradient(
                         listOf(
                             Color.Transparent, Color.Gray, MaterialTheme.colors.primary
