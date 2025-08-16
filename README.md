@@ -28,8 +28,7 @@
 
 Download the prebuilt `.msi`:
 
-* [TtsReader.msi (75.9 MB)](https://github.com/ys-pro-duction/TtsReader/releases)
-* SHA-256: `5177f1ae811422b540e672232fb33ac63eb57114c9ecd005d2e24dc99e6353cd`
+* [TtsReader.msi](https://github.com/ys-pro-duction/TtsReader/releases)
 
 ---
 ### 🔧 Requirements
@@ -47,11 +46,11 @@ cd TtsReader
 ````
 
 
-## 🌐 Chrome Extension
+## 🌐 Browser Extension
 
-Optional browser extension for sending selected text to the desktop app.
+(Optional) browser extension for sending selected text to the desktop app.
 
-### Install Instructions
+### Chrome extention
 
 1. Download: [chrome-extension.zip](https://github.com/ys-pro-duction/TtsReader/releases)
 2. Extract it
@@ -59,6 +58,9 @@ Optional browser extension for sending selected text to the desktop app.
 4. Enable **Developer Mode**
 5. Click **“Load unpacked”** → select extracted folder
 6. Select text on any webpage → right-click → **“Play with TtsReader”**
+
+### Firefox addon
+https://addons.mozilla.org/en-US/firefox/addon/ttsreader-text-to-speech/
 
 TtsReader desktop app must be running in the background.
 
