@@ -9,6 +9,7 @@
   &nbsp;
   <img src="screenshots/img_2.png" alt="Chrome Extension Context Menu" width="30%" />
 </p>
+<h3>Demo <a href="https://lnkd.in/p/ghxGBSdk">https://lnkd.in/p/ghxGBSdk</a></h3>
 ---
 
 ## ✨ Key Features
