@@ -12,9 +12,6 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
         modified = modified.replace(abbr, placeholder)
         placeholderMap[placeholder] = abbr
     }
-    
-    // Normalize line breaks: replace single newlines with spaces, preserve paragraph breaks
-    modified = modified.replace(Regex("""\n(?!\s*\n)"""), " ")
 
     // Replace dotted identifiers (e.g., org.example.Class) with temporary tokens
     val dottedIdentifierRegex = Regex("""\b(?:[a-zA-Z_][\w]*\.)+[a-zA-Z_][\w]*\b""")
@@ -30,9 +27,9 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
     }
 
     // Regex to match:
-    // - a dot that's NOT part of a number or identifier: (?<!\d)\.(?!\d|\w)
-    // - multiple newlines (paragraph breaks)
-    val regex = Regex("""(?<!\d)\.(?![\d\w])|(\n\s*\n+)""")
+    // - a dot that’s NOT part of a number or identifier: (?<!\d)\.(?!\d|\w)
+    // - newline
+    val regex = Regex("""(?<!\d)\.(?![\d\w])|(\n+)""")
 
     val result = mutableListOf<TextSegment>()
     var lastIndex = 0
