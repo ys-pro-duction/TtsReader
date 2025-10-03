@@ -1,10 +1,15 @@
 package utils
 
-data class TextSegment(val text: String, val delimiter: String)
+data class TextSegment(
+    val displayText: String,      // Original text for display (preserves formatting)
+    val delimiter: String,
+    val normalizedText: String = displayText  // Normalized text for TTS processing
+)
 
 fun splitSmartWithDelimiters(input: String): List<TextSegment> {
     val abbreviations = listOf("e.g.", "i.e.", "etc.", "vs.", "Mr.", "Dr.")
     val placeholderMap = mutableMapOf<String, String>()
+
     // Replace known abbreviations with placeholders
     var modified = input
     abbreviations.forEachIndexed { index, abbr ->
@@ -12,9 +17,6 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
         modified = modified.replace(abbr, placeholder)
         placeholderMap[placeholder] = abbr
     }
-
-    // Normalize line breaks: replace single newlines with spaces, preserve paragraph breaks
-    modified = modified.replace(Regex("""\n(?!\s*\n)"""), " ")
 
     // Replace dotted identifiers (e.g., org.example.Class) with temporary tokens
     val dottedIdentifierRegex = Regex("""\b(?:[a-zA-Z_][\w]*\.)+[a-zA-Z_][\w]*\b""")
@@ -55,9 +57,9 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
     }
 
 
-    // Restore identifiers and abbreviations
+    // Restore identifiers and abbreviations, and create normalized version
     return result.map { textSegment ->
-        var restored = textSegment.text
+        var restored = textSegment.displayText
         for (i in remainingDotIds.size - 1 downTo 0) {
             val key = "__DOT_ID_${remainingDotIds[i]}"
             if (restored.contains(key)) {
@@ -69,10 +71,18 @@ fun splitSmartWithDelimiters(input: String): List<TextSegment> {
         placeholderMap.forEach { (placeholder, abbr) ->
             restored = restored.replace(placeholder, abbr)
         }
-        TextSegment(restored, textSegment.delimiter)
+
+        // Create normalized version: replace single newlines with spaces
+        val normalized = restored.replace(Regex("""\n(?!\s*\n)"""), " ")
+
+        TextSegment(
+            displayText = restored,
+            delimiter = textSegment.delimiter,
+            normalizedText = normalized
+        )
     }
 }
 
 fun reconstructFromSegments(segment: List<TextSegment>): String {
-    return segment.joinToString("") { "${it.text}${it.delimiter}" }
+    return segment.joinToString("") { "${it.displayText}${it.delimiter}" }
 }
