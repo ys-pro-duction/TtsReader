@@ -55,7 +55,7 @@ class ModelDownloader(
                                 it.write(buffer, 0, bytesRead)
                                 downloadedSize += bytesRead
                                 listener.onDownloadProgress(downloadedSize/1024/1024)
-                                listener.onProgress("%.2f".format(downloadedSize.toFloat()/totalSize).toFloat())
+                                listener.onProgress(downloadedSize.toFloat()/totalSize)
                             }
                         }
                     }

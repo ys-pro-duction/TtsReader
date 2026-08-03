@@ -9,8 +9,10 @@
   &nbsp;
   <img src="screenshots/img_2.png" alt="Chrome Extension Context Menu" width="30%" />
 </p>
+
+
 <h3>Demo <a href="https://lnkd.in/p/ghxGBSdk">https://lnkd.in/p/ghxGBSdk</a></h3>
----
+
 
 ## ✨ Key Features
 
@@ -22,16 +24,18 @@
   - Right-click selected text → “Play with TtsReader”
 
 
-## 🚀 Getting Started
+## 🚀 Getting Started 
 
 
-### 📦 Windows Installer
+### 📦 Windows Installer ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/ys-pro-duction/TtsReader/total)
+
 
 Download the prebuilt `.msi`:
 
 * [TtsReader.msi](https://github.com/ys-pro-duction/TtsReader/releases)
 
----
+
+--- 
 ### 🔧 Requirements
 
 - JDK 17+
