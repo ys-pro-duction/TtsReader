@@ -79,7 +79,7 @@ fun BoxScope.MainTextArea(modifier: Modifier, baseViewModel: BaseViewModel) {
         val index = currentHighlightWordIndex.value
         if (index < sentences.size) {
             val move =
-                (sentences[index - 1].text.length * scrollState.maxValue / textFieldValue.length)
+                (sentences[index - 1].displayText.length * scrollState.maxValue / textFieldValue.length)
             val scroll = scrollState.value + move
             if (scroll > 20) scrollState.animateScrollTo(scroll)
         }
@@ -128,7 +128,7 @@ fun BoxScope.MainTextArea(modifier: Modifier, baseViewModel: BaseViewModel) {
                                             letterSpacing = TextUnit(1f, TextUnitType.Sp),
                                         )
                                     ) {
-                                        append("${sentence.text}${sentence.delimiter}")
+                                        append("${sentence.displayText}${sentence.delimiter}")
                                     }
                                 }
                             }

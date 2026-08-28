@@ -46,7 +46,7 @@ class TextToSpeech {
         }
         TTSModel.isGeneratingAudio = true
         val generatedAudio = TTSModel.getInstance().generate(
-            sanitizeString(textSegment.text),
+            sanitizeString(textSegment.normalizedText),
             speakerId,
             voiceSpeed
         )
@@ -107,7 +107,7 @@ class TextToSpeech {
     }
 
     fun isValidText(textSegment: TextSegment): Boolean {
-        return textSegment.text.contains(Regex("[a-zA-Z0-9]"))
+        return textSegment.normalizedText.contains(Regex("[a-zA-Z0-9]"))
     }
 
 
